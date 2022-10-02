@@ -1,0 +1,7 @@
+python-Levenshtein
+matplotlib==3.5.0
+numpy
+pandas
+tqdm
+openpyxl
+pdf2image
