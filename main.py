@@ -2,7 +2,10 @@ from draw_rectangle import print_bbox
 
 
 def get_tokens(txt:str):
-  return txt.split()
+  if txt == "nan" or len(txt.strip()) == 0:
+    return []
+  else:
+    return txt.split()
 
 
 import Levenshtein
@@ -28,10 +31,13 @@ get_path(test)
 def label_file(sample, features,ocrdf):
   labels = [get_tokens(str(sample[feat])) for feat in features]
   lens = [len(f) for f in labels]
-  #new_features = [ f for f,l in zip(features,lens) if l > 0]
+  new_features = [ f for f,l in zip(features,lens) if l > 0]
+  new_lens = [ l for l in lens if l > 0]
   tokens_to_search = [token for f in labels for token in f]
   data = [(ocrdf.apply(lambda row: calculate_distance(row["text"],token), axis=1)).to_numpy() for token in tokens_to_search]
-  return np.array(data), tokens_to_search, lens
+  return np.array(data), tokens_to_search, new_lens,new_features
+
+
 
 
 def getx(features,tokens,lens,best_variation):
@@ -76,9 +82,9 @@ for i in tqdm(range(df.shape[0])):
     if os.path.exists(annotation_path):
       continue
 
-    features = sample.keys()[2:]
+    features = sample.keys()[3:]
     ocrdf = pd.read_csv("data/" + file_name + ".csv")
-    data, tokens, lens = label_file(sample, features, ocrdf)
+    data, tokens, lens, features = label_file(sample, features, ocrdf)
     print(tokens)
 
     ocrdf["x"] = (ocrdf.loc[:, "left"] + ocrdf.loc[:, "width"] / 2) / ocrdf.loc[0, "width"]
